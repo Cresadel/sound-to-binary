@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Sound-to-Binary Converter</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background-color: #eef6f3;
+            color: #173b35;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        header {
+            background-color: #1f6f5b;
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        header h1 {
+            margin: 0 0 10px;
+            font-size: 32px;
+        }
+
+        header p {
+            margin: 5px;
+        }
+
+        .card {
+            background-color: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px #cbd8d4;
+        }
+
+        .card h2 {
+            color: #1f6f5b;
+            margin-top: 0;
+        }
+
+        .inputs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 7px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #b8ccc6;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #1f6f5b;
+        }
+
+        button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background-color: #1f6f5b;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #185645;
+        }
+
+        .warning {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            border-radius: 8px;
+            background-color: #ffe3e3;
+            color: #9b1c1c;
+            font-weight: bold;
+        }
+
+        .facts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .fact {
+            background-color: #e8f4f0;
+            padding: 18px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .fact strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .fact span {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1f6f5b;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background-color: #1f6f5b;
+            color: white;
+            padding: 12px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #cbd8d4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f1f7f5;
+        }
+
+        .binary-box {
+            background-color: #172c28;
+            color: #b9f5df;
+            padding: 18px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 18px;
+            word-break: break-word;
+            line-height: 1.8;
+        }
+
+        .total-bits {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .explain li {
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #55756d;
+        }
+
+
+        /* ===== UI upgrade ===== */
+        body {
+            background: linear-gradient(180deg, #e3f1ec 0%, #f4faf8 320px);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #14574a 0%, #1f6f5b 55%, #2e8f76 100%);
+            box-shadow: 0 8px 24px rgba(31, 111, 91, 0.28);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #b9f5df, #5fd3b0, #b9f5df);
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 15px;
+            margin-bottom: 14px !important;
+        }
+
+        .badges {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.16);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 14px;
+        }
+
+        .card {
+            box-shadow: 0 4px 18px rgba(23, 59, 53, 0.08);
+            border: 1px solid #dbe8e3;
+        }
+
+        .card h2 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 .tag {
+            font-size: 12px;
+            font-weight: normal;
+            background: #e8f4f0;
+            color: #1f6f5b;
+            padding: 3px 10px;
+            border-radius: 999px;
+        }
+
+        input:focus {
+            box-shadow: 0 0 0 4px rgba(31, 111, 91, 0.15);
+        }
+
+        button {
+            transition: transform 0.08s ease, background-color 0.15s ease;
+        }
+
+        button:active {
+            transform: scale(0.99);
+        }
+
+        .fact {
+            border: 1px solid #d3e8e1;
+        }
+
+        .fact span {
+            font-size: 22px;
+        }
+
+        tbody tr:hover {
+            background-color: #dff0ea;
+        }
+
+        /* ===== Wave graph ===== */
+        .graph-wrap {
+            width: 100%;
+            background: #fbfefd;
+            border: 1px solid #d3e8e1;
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        #waveCanvas {
+            width: 100%;
+            height: 300px;
+            display: block;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-top: 12px;
+            font-size: 14px;
+        }
+
+        .legend span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .swatch-line {
+            width: 24px; height: 4px; border-radius: 2px;
+            background: #2b86e0;
+        }
+
+        .swatch-step {
+            width: 24px; height: 4px; border-radius: 2px;
+            background: #e08a1e;
+        }
+
+        .swatch-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            background: #f5a623;
+        }
+
+        .toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .toggle input {
+            width: auto;
+            margin: 0;
+            accent-color: #7c4dff;
+        }
+
+        .graph-note {
+            margin: 10px 0 0;
+            font-size: 14px;
+            color: #55756d;
+        }
+
+        @media (max-width: 800px) {
+            .inputs {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .facts {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 15px;
+            }
+
+            .inputs,
+            .facts {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <header>
+        <h1>Sound-to-Binary Converter</h1>
+        <p class="subtitle">Turn one sound wave into samples, levels and binary.</p>
+        <div class="badges">
+            <span class="badge"><strong>Name:</strong> Cresadel M. Dela Cruz</span>
+            <span class="badge"><strong>Section:</strong> 37</span>
+        </div>
+    </header>
+
+
+    <!-- INPUT SECTION -->
+    <div class="card">
+        <h2>Wave Input</h2>
+
+        <div class="inputs">
+
+            <div>
+                <label for="frequency">Frequency (Hz)</label>
+                <input
+                    type="number"
+                    id="frequency"
+                    placeholder="Example: 1000"
+                >
+            </div>
+
+            <div>
+                <label for="amplitude">Amplitude (0 to 1)</label>
+                <input
+                    type="number"
+                    id="amplitude"
+                    placeholder="Example: 1"
+                    step="any"
+                >
+            </div>
+
+            <div>
+                <label for="samples">Number of Samples</label>
+                <input
+                    type="number"
+                    id="samples"
+                    placeholder="2 to 64"
+                >
+            </div>
+
+            <div>
+                <label for="bits">Bits per Sample</label>
+                <input
+                    type="number"
+                    id="bits"
+                    placeholder="1 to 8"
+                >
+            </div>
+
+        </div>
+
+        <button onclick="convertWave()">Convert</button>
+
+        <div id="warning" class="warning"></div>
+    </div>
+
+
+    <!-- WAVE FACTS -->
+    <div class="card" id="resultsSection" style="display: none;">
+
+        <h2>Wave Facts</h2>
+
+        <div class="facts">
+
+            <div class="fact">
+                <strong>Amplitude</strong>
+                <span id="showAmplitude">-</span>
+            </div>
+
+            <div class="fact">
+                <strong>Frequency</strong>
+                <span id="showFrequency">-</span>
+            </div>
+
+            <div class="fact">
+                <strong>Period</strong>
+                <span id="showPeriod">-</span>
+            </div>
+
+            <div class="fact">
+                <strong>Wavelength</strong>
+                <span id="showWavelength">-</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- WAVE GRAPH -->
+    <div class="card" id="graphSection" style="display: none;">
+
+        <h2>Sound Wave Graph <span class="tag">one full wave</span></h2>
+
+        <div class="graph-wrap">
+            <canvas id="waveCanvas"></canvas>
+        </div>
+
+        <div class="legend">
+            <span><i class="swatch-line"></i> Sound wave</span>
+            <span><i class="swatch-dot"></i> Sample (one measurement)</span>
+            <label class="toggle">
+                <input type="checkbox" id="showLevels">
+                Show rounded levels
+            </label>
+        </div>
+
+        <p class="graph-note">
+            Each dot is one sample. Turn on "Show rounded levels" to see the
+            purple steps, which are the levels that actually get stored as binary.
+        </p>
+
+    </div>
+
+
+    <!-- SAMPLE TABLE -->
+    <div class="card" id="tableSection" style="display: none;">
+
+        <h2>Sample Values</h2>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Sample #</th>
+                        <th>Time (ms)</th>
+                        <th>Amplitude</th>
+                        <th>Level</th>
+                        <th>Binary</th>
+                    </tr>
+                </thead>
+
+                <tbody id="sampleTable">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- BINARY RESULT -->
+    <div class="card" id="binarySection" style="display: none;">
+
+        <h2>Whole Binary Result</h2>
+
+        <div id="binaryResult" class="binary-box"></div>
+
+        <div id="totalBits" class="total-bits"></div>
+
+    </div>
+
+
+    <!-- TEST RESULTS -->
+    <div class="card">
+
+        <h2>Test Results</h2>
+
+        <p>
+            These results are based on the required test settings.
+        </p>
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Test</th>
+                        <th>Frequency</th>
+                        <th>Amplitude</th>
+                        <th>Samples</th>
+                        <th>Bits</th>
+                        <th>Period</th>
+                        <th>Wavelength</th>
+                        <th>Total Bits</th>
+                        <th>Binary Result</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>A</td>
+                        <td>440</td>
+                        <td>0.8</td>
+                        <td>8</td>
+                        <td>3</td>
+                        <td>2.27 ms</td>
+                        <td>78.0 cm</td>
+                        <td>24</td>
+                        <td>100 101 110 101 100 010 001 010</td>
+                    </tr>
+
+                    <tr>
+                        <td>B</td>
+                        <td>200</td>
+                        <td>0.5</td>
+                        <td>6</td>
+                        <td>4</td>
+                        <td>5.00 ms</td>
+                        <td>1.72 m</td>
+                        <td>24</td>
+                        <td>1000 1011 1011 1000 0100 0100</td>
+                    </tr>
+
+                    <tr>
+                        <td>C</td>
+                        <td>500</td>
+                        <td>0.9</td>
+                        <td>5</td>
+                        <td>3</td>
+                        <td>2.00 ms</td>
+                        <td>68.6 cm</td>
+                        <td>15</td>
+                        <td>100 110 101 010 001</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- EXPLAIN IT -->
+    <div class="card explain">
+
+        <h2>Explain It</h2>
+
+        <ol>
+
+            <li>
+                <strong>How does your app change a sound wave into binary?</strong>
+                <br>
+                My app samples the wave, changes each sample into a level,
+                and converts each level into binary. The three steps are
+                sampling, quantization, and binary encoding.
+            </li>
+
+            <li>
+                <strong>Which gives more detail, 2 bits or 6 bits?</strong>
+                <br>
+                Six bits gives more detail because it has 64 levels, while
+                2 bits has only 4. With more levels, the binary follows the
+                wave's height more closely, but it also uses more bits.
+            </li>
+
+            <li>
+                <strong>Which test has the longest wavelength?</strong>
+                <br>
+                Test B has the longest wavelength at 1.72 m.
+                Wavelength and frequency are inversely related, so a lower
+                frequency produces a longer wavelength.
+            </li>
+
+            <li>
+                <strong>What was the hardest stage to build?</strong>
+                <br>
+                The hardest part was converting the sample levels into
+                the correct binary values. I fixed it by following the
+                formulas carefully and adding leading zeros.
+            </li>
+
+        </ol>
+
+    </div>
+
+
+    <footer>
+        Sound-to-Binary Converter &copy; 2026
+    </footer>
+
+</div>
+
+
+<script>
+
+    function convertWave() {
+
+        // Get input values
+        const frequencyInput = document.getElementById("frequency").value;
+        const amplitudeInput = document.getElementById("amplitude").value;
+        const samplesInput = document.getElementById("samples").value;
+        const bitsInput = document.getElementById("bits").value;
+
+        const frequency = Number(frequencyInput);
+        const amplitude = Number(amplitudeInput);
+        const samples = Number(samplesInput);
+        const bits = Number(bitsInput);
+
+        const warning = document.getElementById("warning");
+
+        // Hide previous warning
+        warning.style.display = "none";
+        warning.textContent = "";
+
+        // Validate the inputs
+        if (
+            frequencyInput === "" ||
+            amplitudeInput === "" ||
+            samplesInput === "" ||
+            bitsInput === ""
+        ) {
+            showWarning("Please enter all four values.");
+            return;
+        }
+
+        if (frequency <= 0) {
+            showWarning("Warning: Frequency must be greater than 0.");
+            return;
+        }
+
+        if (amplitude < 0 || amplitude > 1) {
+            showWarning("Warning: Amplitude must be between 0 and 1.");
+            return;
+        }
+
+        if (!Number.isInteger(samples) || samples < 2 || samples > 64) {
+            showWarning("Warning: Samples must be a whole number from 2 to 64.");
+            return;
+        }
+
+        if (!Number.isInteger(bits) || bits < 1 || bits > 8) {
+            showWarning("Warning: Bits must be a whole number from 1 to 8.");
+            return;
+        }
+
+
+        // ------------------------------------
+        // 1. Calculate period
+        // ------------------------------------
+
+        const periodSeconds = 1 / frequency;
+
+        // Convert seconds to milliseconds
+        const periodMs = periodSeconds * 1000;
+
+
+        // ------------------------------------
+        // 2. Calculate wavelength
+        // ------------------------------------
+
+        const wavelengthMeters = 343 / frequency;
+
+
+        // ------------------------------------
+        // Show wave facts
+        // ------------------------------------
+
+        document.getElementById("showAmplitude").textContent =
+            amplitudeInput;
+
+        document.getElementById("showFrequency").textContent =
+            frequencyInput + " Hz";
+
+        document.getElementById("showPeriod").textContent =
+            periodMs.toFixed(2) + " ms";
+
+        document.getElementById("showWavelength").textContent =
+            formatWavelength(wavelengthMeters);
+
+
+        // ------------------------------------
+        // Number of levels
+        // ------------------------------------
+
+        const levels = Math.pow(2, bits);
+
+
+        // ------------------------------------
+        // Prepare table
+        // ------------------------------------
+
+        const table = document.getElementById("sampleTable");
+
+        table.innerHTML = "";
+
+        let binaryValues = [];
+        let sampleData = [];
+
+
+        // ------------------------------------
+        // Loop through every sample
+        // ------------------------------------
+
+        for (let i = 0; i < samples; i++) {
+
+            // Time of sample
+            const timeSeconds =
+                (i * periodSeconds) / samples;
+
+            const timeMs =
+                timeSeconds * 1000;
+
+
+            // Height of sample
+            //
+            // IMPORTANT:
+            // Do not put frequency inside this formula.
+            //
+            const height =
+                amplitude *
+                Math.sin((2 * Math.PI * i) / samples);
+
+
+            // Level of sample
+            const level =
+                Math.round(
+                    ((height + 1) / 2) *
+                    (levels - 1)
+                );
+
+
+            // Convert level to binary
+            let binary =
+                level.toString(2);
+
+
+            // Add leading zeros
+            while (binary.length < bits) {
+                binary = "0" + binary;
+            }
+
+
+            // Save binary
+            binaryValues.push(binary);
+            sampleData.push({ height: height, level: level });
+
+
+            // Create table row
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${i + 1}</td>
+                <td>${timeMs.toFixed(2)}</td>
+                <td>${height.toFixed(2)}</td>
+                <td>${level}</td>
+                <td>${binary}</td>
+            `;
+
+            table.appendChild(row);
+        }
+
+
+        // ------------------------------------
+        // Whole binary result
+        // ------------------------------------
+
+        const wholeBinary =
+            binaryValues.join(" ");
+
+
+        document.getElementById("binaryResult").textContent =
+            wholeBinary;
+
+
+        // ------------------------------------
+        // Total number of bits
+        // ------------------------------------
+
+        const totalBits =
+            samples * bits;
+
+
+        document.getElementById("totalBits").textContent =
+            "Total Bits: " + totalBits;
+
+
+        // ------------------------------------
+        // Show result sections
+        // ------------------------------------
+
+        document.getElementById("resultsSection").style.display =
+            "block";
+
+        document.getElementById("tableSection").style.display =
+            "block";
+
+        document.getElementById("binarySection").style.display =
+            "block";
+
+        // Draw the graph (section must be visible first so it has a size)
+        document.getElementById("graphSection").style.display =
+            "block";
+
+        lastGraph = {
+            amplitude: amplitude,
+            levels: levels,
+            samples: samples,
+            data: sampleData
+        };
+
+        drawWave();
+    }
+
+
+    // ------------------------------------
+    // Warning function
+    // ------------------------------------
+
+    function showWarning(message) {
+
+        const warning =
+            document.getElementById("warning");
+
+        warning.textContent = message;
+        warning.style.display = "block";
+
+        document.getElementById("resultsSection").style.display =
+            "none";
+
+        document.getElementById("tableSection").style.display =
+            "none";
+
+        document.getElementById("binarySection").style.display =
+            "none";
+
+        document.getElementById("graphSection").style.display =
+            "none";
+    }
+
+
+    // ------------------------------------
+    // Wavelength formatting
+    // ------------------------------------
+
+    function formatWavelength(meters) {
+
+        if (meters >= 1) {
+
+            return meters.toFixed(2) + " m";
+
+        } else {
+
+            const centimeters =
+                meters * 100;
+
+            return centimeters.toFixed(1) + " cm";
+        }
+    }
+
+
+    // ------------------------------------
+    // Sound wave graph (canvas)
+    // ------------------------------------
+
+    let lastGraph = null;
+
+    function drawWave() {
+
+        if (!lastGraph) return;
+
+        const canvas = document.getElementById("waveCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Sharp drawing on high-resolution screens
+        const ratio = window.devicePixelRatio || 1;
+        const W = canvas.clientWidth;
+        const H = canvas.clientHeight;
+
+        canvas.width = W * ratio;
+        canvas.height = H * ratio;
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+
+        const n = lastGraph.samples;
+        const amp = lastGraph.amplitude;
+        const levels = lastGraph.levels;
+        const data = lastGraph.data;
+        const showLevels = document.getElementById("showLevels").checked;
+
+        // Plot area
+        const left = 40, right = 14, top = 16, bottom = 16;
+        const plotW = W - left - right;
+        const plotH = H - top - bottom;
+
+        // x: 0 to 1 (one full wave).  y: -1 to 1.
+        const xPos = (t) => left + t * plotW;
+        const yPos = (v) => top + (1 - (v + 1) / 2) * plotH;
+
+        // --- Grid lines and y labels (+1, 0, -1) ---
+        ctx.font = "13px Arial";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+
+        [1, 0.5, 0, -0.5, -1].forEach(function (v) {
+            const y = yPos(v);
+            const isMain = (v === 1 || v === 0 || v === -1);
+
+            ctx.strokeStyle = v === 0 ? "#8fb1a8" : "#dbe8e3";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(left, y);
+            ctx.lineTo(left + plotW, y);
+            ctx.stroke();
+
+            if (isMain) {
+                ctx.fillStyle = "#3d5a53";
+                ctx.fillText(v === 1 ? "+1" : String(v), left - 8, y);
+            }
+        });
+
+        // --- Rounded levels (optional stair steps) ---
+        const levelToHeight = (lv) => (lv / (levels - 1)) * 2 - 1;
+
+        if (showLevels) {
+            ctx.strokeStyle = "#7c4dff";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            data.forEach(function (d, i) {
+                const y = yPos(levelToHeight(d.level));
+                const x1 = xPos(i / n);
+                const x2 = xPos((i + 1) / n);
+                if (i === 0) ctx.moveTo(x1, y);
+                else ctx.lineTo(x1, y);
+                ctx.lineTo(x2, y);
+            });
+            ctx.stroke();
+        }
+
+        // --- Dashed stems from each sample down to the zero line ---
+        ctx.strokeStyle = "#a9c4bc";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+
+        data.forEach(function (d, i) {
+            const x = xPos(i / n);
+            ctx.beginPath();
+            ctx.moveTo(x, yPos(0));
+            ctx.lineTo(x, yPos(d.height));
+            ctx.stroke();
+        });
+
+        ctx.setLineDash([]);
+
+        // --- Smooth blue wave ---
+        ctx.strokeStyle = "#2b86e0";
+        ctx.lineWidth = 3.5;
+        ctx.lineJoin = "round";
+        ctx.beginPath();
+
+        const steps = 400;
+        for (let k = 0; k <= steps; k++) {
+            const t = k / steps;
+            const v = amp * Math.sin(2 * Math.PI * t);
+            if (k === 0) ctx.moveTo(xPos(t), yPos(v));
+            else ctx.lineTo(xPos(t), yPos(v));
+        }
+        ctx.stroke();
+
+        // --- Orange sample dots ---
+        const radius = n > 40 ? 4 : 6;
+        ctx.fillStyle = "#f5a623";
+
+        data.forEach(function (d, i) {
+            ctx.beginPath();
+            ctx.arc(xPos(i / n), yPos(d.height), radius, 0, Math.PI * 2);
+            ctx.fill();
+        });
+    }
+
+    // Redraw if the window is resized
+    window.addEventListener("resize", drawWave);
+    document.getElementById("showLevels").addEventListener("change", drawWave);
+
+    // Press Enter in any box to convert
+    document.querySelectorAll(".inputs input").forEach(function (box) {
+        box.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") convertWave();
+        });
+    });
+
+</script>
+
+</body>
+</html>
